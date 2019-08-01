@@ -1,0 +1,6 @@
+.row-warpper { 
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 10%);
+    grid-gap: 0px;
+    min-height:10vw;
+}
