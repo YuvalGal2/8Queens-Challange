@@ -1,9 +1,13 @@
 .col {
-    border:1px solid red;
+    border:1px solid lightgray;
     height: 100%;
     width: 100%;
+    text-align: center;
 }
 
-.content { 
-    text-align: center;
+img { 
+    width:100%;
+    display: block;
+    height:100%;
+
 }

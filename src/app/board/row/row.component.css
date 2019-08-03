@@ -2,5 +2,11 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, 10%);
     grid-gap: 0px;
-    min-height:10vw;
+    min-height:50px;
+    justify-content: center;
+}
+@media(min-width:1500px) {
+    .row-warpper { 
+        grid-template-columns: repeat(auto-fit, 6%);
+    }
 }

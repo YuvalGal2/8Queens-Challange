@@ -1,6 +1,7 @@
 import { Game } from './models/game.model';
 import { Queen } from './models/queen.model';
 import { Injectable } from '@angular/core';
+import { BehaviorSubject,Observable,Subject  } from 'rxjs';
 @Injectable({
 	providedIn: 'root'
 })
@@ -8,7 +9,12 @@ export class BoardService {
 	private numOfRowsAndCols: number;
 	private queensPositions: number[][] = [];
 	private queensOccipiedPositions: number[][] = [];
+	private numOffQueensToFind:number = 8;
 	private game = new Game();
+
+	gameStatus = new BehaviorSubject(this.game.getGameStatus());
+	gameRestarted = new Subject();
+
 	constructor() { }
 
 	// single validation funciton
@@ -128,12 +134,14 @@ export class BoardService {
 		if (!alreadyExists) {
 			if ( this.validateQueenPosition(queenPosition)) {
 					placedWell = true;
-					if (this.getQueensPositions().length === 2) {
+					if (this.getQueensPositions().length === this.numOffQueensToFind) {
 						this.game.setGameStatus({ over: true, result: 'win' });
+						this.gameStatus.next(this.game.getGameStatus());
 					}
 			}
 			else {
 				this.game.setGameStatus({ over: true, result: 'lose' });
+				this.gameStatus.next(this.game.getGameStatus());
 				placedWell = false;;
 			}
 		}
@@ -182,11 +190,12 @@ export class BoardService {
 		this.game.setGameStatus({ over: false, result: null });
 		this.queensOccipiedPositions = [];
 		this.queensPositions = [];
+		this.gameRestarted.next(true);
 	}
 
 
-	setBoardSize(size: number = 8): void {
-		this.numOfRowsAndCols = size;
+	setBoardSize(size: number = 8):number {
+		return this.numOfRowsAndCols = size;
 	}
 
 	getBoardSize(): number {
