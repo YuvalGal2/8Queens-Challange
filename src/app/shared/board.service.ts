@@ -1,10 +1,13 @@
 import { Game } from './models/game.model';
 import { Queen } from './models/queen.model';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
+
 @Injectable({
 	providedIn: 'root'
 })
+
+
 export class BoardService {
 	private numOfRowsAndCols: number;
 	private queensPositions: number[][] = [];
@@ -216,7 +219,4 @@ export class BoardService {
 			})
 		}
 	}
-
-
-
 }
