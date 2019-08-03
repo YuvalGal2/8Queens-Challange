@@ -1,3 +1,14 @@
 <div class="board-warpper">
+    <h3>Super Simple 8Q Chllange Board</h3>
+    <div class="messages">
+            <div class="won" *ngIf=" gameStatus === 1" >
+                    <p>Well Done, <b>You solved the Chllange</b></p>  
+             </div>
+            <div class="failed" *ngIf=" gameStatus === 2" >
+                    <p>Did you just let Cersei win? Sorry, <b>you lost.</b></p>
+                    <p>Have another try!</p>
+            </div>
+
+    </div>
     <app-row *ngFor="let row of boardRows;" [rowIndex]="row"></app-row>
 </div>

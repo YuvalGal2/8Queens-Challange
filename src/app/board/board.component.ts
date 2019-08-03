@@ -8,16 +8,17 @@ import { BoardService } from '../shared/board.service';
 export class BoardComponent implements OnInit {
   constructor(private BoardService: BoardService) { }
   boardRows: number[] = [];
+  gameStatus:number = 0;
   ngOnInit() {
     this.initalizedRows();
     this.BoardService.gameStatus.subscribe((gamestatus) => {
       if (gamestatus.over === true) {
         switch (gamestatus.result) {
           case "win":
-            alert("Good Job, you have won!")
+            this.gameStatus = 1;
             break;
           case "lose":
-            alert("Sorry, You have lost.. try again later!")
+            this.gameStatus = 2;
             this.BoardService.restartGame();
             this.initalizedRows();
             break;
