@@ -13,12 +13,10 @@ export class ColComponent implements OnInit {
   constructor(private BoardService: BoardService) { }
 
   ngOnInit() {
-    this.BoardService.gameRestarted.subscribe((observer) => this.cellStatus = null )
+    this.BoardService.gameRestarted.subscribe(() => this.cellStatus = null )
   }
-  onCellClicked(): void {
-    const newCellStatus = this.BoardService.setQueenPosition({ row: this.colPos[0], col: this.colPos[1] });
-    this.cellStatus = newCellStatus;
-    console.log(this.cellStatus);
+  onCellClicked():void {
+    this.cellStatus = this.BoardService.setQueenPosition({ row: this.colPos[0], col: this.colPos[1] });
   }
 
 }
