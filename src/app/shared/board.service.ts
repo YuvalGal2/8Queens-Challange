@@ -1,46 +1,48 @@
+import { Game } from './models/game.model';
 import { Queen } from './models/queen.model';
 import { Injectable } from '@angular/core';
 @Injectable({
 	providedIn: 'root'
 })
 export class BoardService {
-	private numOfRowsAndCols;
-	private gameStatus = false;
-	private queensPositions = [];
-	private queensOccipiedPositions = [];
-
-	// * VERY IMPORTANT!!!!!!!
-	// * USE THE MODEL OF THE Queen to set and set the position of the queens.
-
+	private numOfRowsAndCols: number;
+	private queensPositions: number[][] = [];
+	private queensOccipiedPositions: number[][] = [];
+	private game = new Game();
 	constructor() { }
 
-	validateQueenPosition(queenPosition) {
-
+	// single validation funciton
+	validateQueenPosition(queenPosition: Queen["position"]) {
+		let queenPlacementIsValid = true;
 		const markedOccupiedPositions = [
+			[queenPosition.row, queenPosition.col],
 			...this.markDiagonalLineAbovePos(queenPosition),
 			...this.markDiagonalLineBelowPos(queenPosition),
 			...this.markLeftToRight(queenPosition),
 			...this.markTopToBottom(queenPosition)
-		];	
+		];
+
+		markedOccupiedPositions.forEach((markedPosition: number[]) => [
+			this.getQueensPositions().forEach((queenPosition:number[]) => {
+				if (markedPosition.toString() === queenPosition.toString()) {
+					console.log(queenPosition);
+					console.log(markedPosition);
+					queenPlacementIsValid = false;
+				}
+			})
+		])
+
 		
-		const placementCauseThreat = markedOccupiedPositions.find((pos) => {
-			return this.getqueensPositions().toString().includes(pos.toString());
-		})
-		if(placementCauseThreat) {
-			//console.log("error!");
-			return false;
-		}
-		else {
-			console.log("Queen placed!");
-			this.queensPositions.push([queenPosition.row,queenPosition.col]);
+		if (queenPlacementIsValid) {
+			this.queensPositions.push([queenPosition.row, queenPosition.col]);
 			this.queensOccipiedPositions.push(...markedOccupiedPositions);
-			console.log(this.queensOccipiedPositions);
 		}
 
-
+		return queenPlacementIsValid;
 	}
 
-	markDiagonalLineBelowPos(queenPosition) {
+	// use these funcitons as a blueprint to mark which areas the newly placed queen will block
+	markDiagonalLineBelowPos(queenPosition: Queen["position"]) {
 		const occupiedCells = []
 		for (let row = queenPosition.row + 1, col = queenPosition.col; row <= this.numOfRowsAndCols; row++) {
 			if (++col <= this.numOfRowsAndCols && row <= this.numOfRowsAndCols) {
@@ -59,7 +61,7 @@ export class BoardService {
 		return occupiedCells;
 	}
 
-	markDiagonalLineAbovePos(queenPosition) {
+	markDiagonalLineAbovePos(queenPosition: Queen["position"]) {
 		const occupiedCells = []
 		for (let row = queenPosition.row - 1, col = queenPosition.col; row > 0; row--) {
 			if (--col > 0 && row > 0) {
@@ -79,29 +81,8 @@ export class BoardService {
 		return occupiedCells;
 	}
 
-	isPositionExistsAlready(checkInArray: number[], position: number[]): boolean {
-		if (checkInArray.toString().includes(position.toString())) {
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-
-
-
-
-
-
-
-
-
-
-
-
-	markTopToBottom(queenPosition) {
+	markTopToBottom(queenPosition: Queen["position"]) {
 		const occupiedCells = [];
-		// go from top to bottom
 		for (let row = 1; row <= this.numOfRowsAndCols; row++) {
 			if (row !== queenPosition.row) {
 				occupiedCells.push([row, queenPosition.col])
@@ -110,11 +91,8 @@ export class BoardService {
 		return occupiedCells;
 	}
 
-
-
-	markLeftToRight(queenPosition) {
+	markLeftToRight(queenPosition: Queen["position"]) {
 		const occupiedCells = [];
-		// go from left to right
 		for (let col = 1; col <= this.numOfRowsAndCols; col++) {
 			if (col !== queenPosition.col) {
 				occupiedCells.push([queenPosition.row, col])
@@ -123,35 +101,89 @@ export class BoardService {
 		return occupiedCells;
 	}
 
-
-	setQueenPosition(queenPosition): void {
-		const alreadyExists = this.getqueensPositions().toString().includes(queenPosition.toString());
-		if (!alreadyExists) {
-			console.log("New!");
-			this.validateQueenPosition({ row: queenPosition[0], col: queenPosition[1] });
+	// utilities functions
+	isPositionExistsAlready(checkInArray: number[], position: number[]): boolean {
+		if (checkInArray.toString().includes(position.toString())) {
+			return true;
+		}
+		else {
+			return false;
 		}
 	}
+	
+	setQueenPosition(queenPosition: Queen["position"]) {
+
+		// for starting, the cell is empty.
+		let placedWell = null;
+		let alreadyExists = false;
+
+		// go over the queens position and look for already placed queen in that cell.
+		this.queensPositions.forEach((queen) => {
+			if(queen.toString() === [queenPosition.row,queenPosition.col].toString()){
+				alreadyExists = true;
+			}
+		});
+
+		// if there is no queen in that cell..
+		if (!alreadyExists) {
+			if ( this.validateQueenPosition(queenPosition)) {
+					placedWell = true;
+					if (this.getQueensPositions().length === 2) {
+						this.game.setGameStatus({ over: true, result: 'win' });
+					}
+			}
+			else {
+				this.game.setGameStatus({ over: true, result: 'lose' });
+				placedWell = false;;
+			}
+		}
+		else { 
+			// if there is, clean it.
+			this.cleanCell(queenPosition);
+		}
+		return placedWell;
+	}
+
+	cleanCell(queenPosition){
+		// Get all related occipied Positions by that cell.
+		const markedOccupiedPositions = [
+			[queenPosition.row, queenPosition.col],
+			...this.markDiagonalLineAbovePos(queenPosition),
+			...this.markDiagonalLineBelowPos(queenPosition),
+			...this.markLeftToRight(queenPosition),
+			...this.markTopToBottom(queenPosition)
+		];
+
+		// remove the queen from the queens list.
+		const filterdQueensPositions = this.getQueensPositions()
+		.filter((queenPos) => queenPos.toString() !== [queenPosition.row,queenPosition.col].toString());
 
 
-
-
-
-	// TODO : Change functions name to upper case.
-	getqueensPositions() {
+		// remove all the occipied Positions one by one.
+		this.queensPositions = filterdQueensPositions;
+		for(let marked of markedOccupiedPositions) {
+			this.getQueensOccipiedPositions().filter((occpiedPos,index) => {
+				if(occpiedPos.toLocaleString() === marked.toString()) {
+					this.queensOccipiedPositions.splice(index,1);
+					return occpiedPos.toString() === marked.toString();
+				}
+			})
+		}
+	}
+	getQueensPositions(): number[][] {
 		return this.queensPositions;
 	}
 
-	getqueensOccipiedPositions() {
+	getQueensOccipiedPositions(): number[][] {
 		return this.queensOccipiedPositions;
 	}
 
-	getGameStatus(): boolean {
-		return this.gameStatus;
+	restartGame(): void {
+		this.game.setGameStatus({ over: false, result: null });
+		this.queensOccipiedPositions = [];
+		this.queensPositions = [];
 	}
 
-	setGameStatus(newGameStatus: boolean): boolean {
-		return this.gameStatus = newGameStatus;
-	}
 
 	setBoardSize(size: number = 8): void {
 		this.numOfRowsAndCols = size;

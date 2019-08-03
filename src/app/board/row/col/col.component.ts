@@ -1,5 +1,5 @@
 import { BoardService } from './../../../shared/board.service';
-import { Component, OnInit,Input } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 
 @Component({
   selector: 'app-col',
@@ -8,13 +8,26 @@ import { Component, OnInit,Input } from '@angular/core';
 })
 export class ColComponent implements OnInit {
   @Input() colPos = [];
-  constructor(private BoardService:BoardService) { }
+  cellText: string = "Empty Cell";
+  constructor(private BoardService: BoardService) { }
 
   ngOnInit() {
-    
+
   }
-  onCellClicked():void {
-    this.BoardService.setQueenPosition([this.colPos[0],this.colPos[1]])
+  onCellClicked(): void {
+    const cellStatus = this.BoardService.setQueenPosition({ row: this.colPos[0], col: this.colPos[1] });
+    switch (cellStatus) {
+      case null:
+        this.cellText = "Empty Cell";
+        break;
+      case false:
+        this.cellText = "Dead!";
+        break;
+      case true:
+        this.cellText = "Queen!";
+        break;
+    }
+
   }
 
 }

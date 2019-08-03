@@ -1,7 +1,8 @@
 export interface Queen { 
     threaten:boolean;
-    position: { 
+    position:{
         row:number,
         col:number
     }
+    
 }
