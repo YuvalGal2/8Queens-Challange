@@ -17,84 +17,76 @@ export class BoardService {
 	validateQueenPosition(queenPosition) {
 
 		const markedOccupiedPositions = [
-			...this.markDiagonalLine(queenPosition)
-		];
-
-
-		// const markedOccupiedPositions = [
-		// 	[queenPosition.row,queenPosition.col],
-		// 	...this.markDiagonalLineLtr(queenPosition),
-		// 	...this.markDiagonalLineRtl(queenPosition),
-		// 	...this.markLeftToRight(queenPosition),
-		// 	...this.markTopToBottom(queenPosition)
-		// ];
-
-		// const placementCauseThreat = markedOccupiedPositions.find((pos) => {
-		// 	return this.getqueensPositions().toString().includes(pos.toString());
-		// })
-		// if(placementCauseThreat) {
-		// 	//console.log("error!");
-		// 	return false;
-		// }
-		// else {
-		// 	console.log("Queen placed!");
-		// 	this.queensPositions.push([queenPosition.row,queenPosition.col]);
-		// 	this.queensOccipiedPositions.push(...markedOccupiedPositions);
-		// 	console.log(this.queensOccipiedPositions);
-		// }
+			...this.markDiagonalLineAbovePos(queenPosition),
+			...this.markDiagonalLineBelowPos(queenPosition),
+			...this.markLeftToRight(queenPosition),
+			...this.markTopToBottom(queenPosition)
+		];	
+		
+		const placementCauseThreat = markedOccupiedPositions.find((pos) => {
+			return this.getqueensPositions().toString().includes(pos.toString());
+		})
+		if(placementCauseThreat) {
+			//console.log("error!");
+			return false;
+		}
+		else {
+			console.log("Queen placed!");
+			this.queensPositions.push([queenPosition.row,queenPosition.col]);
+			this.queensOccipiedPositions.push(...markedOccupiedPositions);
+			console.log(this.queensOccipiedPositions);
+		}
 
 
 	}
 
-	markDiagonalLine(queenPosition) {
+	markDiagonalLineBelowPos(queenPosition) {
 		const occupiedCells = []
-		
-		// [x,x,x,y]
-		// [y,x,y,x] -- t = target
-		// [x,t,x,x] -- y = completed
-		// [y,x,y,x] -- z = working on it
-	
-		for(let row = queenPosition.row + 1,col = queenPosition.col; row <= this.numOfRowsAndCols; row++){
-			if(++col <= this.numOfRowsAndCols && row <= this.numOfRowsAndCols) {
-				console.log([row,col])
+		for (let row = queenPosition.row + 1, col = queenPosition.col; row <= this.numOfRowsAndCols; row++) {
+			if (++col <= this.numOfRowsAndCols && row <= this.numOfRowsAndCols) {
+				if (!this.isPositionExistsAlready(occupiedCells, [row, col])) {
+					occupiedCells.push([row, col]);
+				}
 			}
 		}
-		for(let row = queenPosition.row + 1,col = queenPosition.col; row <= this.numOfRowsAndCols; row++){
-			if(--col > 0 && row <= this.numOfRowsAndCols) {
-				console.log([row,col])
+		for (let row = queenPosition.row + 1, col = queenPosition.col; row <= this.numOfRowsAndCols; row++) {
+			if (--col > 0 && row <= this.numOfRowsAndCols) {
+				if (!this.isPositionExistsAlready(occupiedCells, [row, col])) {
+					occupiedCells.push([row, col]);
+				}
 			}
 		}
-		
-
-		for(let row = queenPosition.row - 1, col = queenPosition.col; row > 0; row--){
-			if(--col > 0 && row > 0) {
-				console.log([row,col]);
-			}
-		}
-
-		for(let row = queenPosition.row - 1, col = queenPosition.col; row > 0; row--){
-			if(++col > 0 && row > 0) {
-				console.log([row,col]);
-			}
-		}
-
-
-		// go from up to down and from down to up.
-		// filter unieq
-		// reutnr.
-
-
-
-
-
-
-
 		return occupiedCells;
 	}
 
+	markDiagonalLineAbovePos(queenPosition) {
+		const occupiedCells = []
+		for (let row = queenPosition.row - 1, col = queenPosition.col; row > 0; row--) {
+			if (--col > 0 && row > 0) {
+				if (!this.isPositionExistsAlready(occupiedCells, [row, col])) {
+					occupiedCells.push([row, col]);
+				}
+			}
+		}
 
+		for (let row = queenPosition.row - 1, col = queenPosition.col; row > 0; row--) {
+			if (++col > 0 && row > 0) {
+				if (!this.isPositionExistsAlready(occupiedCells, [row, col])) {
+					occupiedCells.push([row, col]);
+				}
+			}
+		}
+		return occupiedCells;
+	}
 
-
+	isPositionExistsAlready(checkInArray: number[], position: number[]): boolean {
+		if (checkInArray.toString().includes(position.toString())) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
 
 
 
