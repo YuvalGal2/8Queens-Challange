@@ -1,114 +1,132 @@
 import { Queen } from './models/queen.model';
 import { Injectable } from '@angular/core';
-import { isFulfilled } from 'q';
 @Injectable({
 	providedIn: 'root'
 })
 export class BoardService {
 	private numOfRowsAndCols;
 	private gameStatus = false;
-	private queensPositions: Queen["position"][] = [];
+	private queensPositions = [];
+	private queensOccipiedPositions = [];
 
+	// * VERY IMPORTANT!!!!!!!
+	// * USE THE MODEL OF THE Queen to set and set the position of the queens.
 
 	constructor() { }
 
+	validateQueenPosition(queenPosition) {
 
-	checkDiagonalLineLtr(queenPosition: Queen["position"]):any {
-		return false;
-	}
-	checkDiagonalLineRtl(queenPosition: Queen["position"]):any {
-		return false;
-	}
-	checkTopToBottom(queenPosition: Queen["position"]):any {
-		return false;
-	}
-	checkLeftToRight(queenPosition: Queen["position"]):any {
-		return false;
-	}
+		const markedOccupiedPositions = [
+			[queenPosition.row,queenPosition.col],
+			...this.markDiagonalLineLtr(queenPosition),
+			...this.markDiagonalLineRtl(queenPosition),
+			...this.markLeftToRight(queenPosition),
+			...this.markTopToBottom(queenPosition)
+		];
+		
 	
-	validateQueenPosition(queenPosition: Queen["position"]): boolean {
-		const forbiddenCells = [];
-		console.log(`clicked on: `);
-		console.log(queenPosition);
-		console.log('-----');
-		// TODO:
-		// * the condition: if cell isnt in the array 
-		// * after condition is passed.
-
-		// TODO: 
-		//forbiddenCells.push([++row,col]) -- if the condition is passed.
-
-		//  foreach queen placed,
-		// go from top left  -> one col bottom right
-
-		for (let row = queenPosition.row, col = queenPosition.col + 1; col <= this.numOfRowsAndCols; col++) {
-			forbiddenCells.push([++row, col,'diagonal line left to right'])
+		const placementCauseThreat = markedOccupiedPositions.find((pos) => {
+			return this.getqueensPositions().toString().includes(pos.toString());
+		})
+		if(placementCauseThreat) {
+			//console.log("error!");
+			return false;
 		}
+		else {
+			console.log("Queen placed!");
+			this.queensPositions.push([queenPosition.row,queenPosition.col]);
+			this.queensOccipiedPositions.push(...markedOccupiedPositions);
+			console.log(this.queensOccipiedPositions);
+		}
+		
+	}
 
 
-		// go from top right  -> one col bottom left
+
+	setQueenPosition(queenPosition): void {
+		const alreadyExists = this.getqueensPositions().toString().includes(queenPosition.toString());
+		if (!alreadyExists) {
+			console.log("New!");
+			this.validateQueenPosition({ row: queenPosition[0], col: queenPosition[1] });
+		}
+	}
+
+
+
+
+
+	// TODO : Change functions name to upper case.
+	getqueensPositions() {
+		return this.queensPositions;
+	}
+
+	getqueensOccipiedPositions() {
+		return this.queensOccipiedPositions;
+	}
+
+	getGameStatus(): boolean {
+		return this.gameStatus;
+	}
+
+	setGameStatus(newGameStatus: boolean): boolean {
+		return this.gameStatus = newGameStatus;
+	}
+
+	setBoardSize(size: number = 8): void {
+		this.numOfRowsAndCols = size;
+	}
+
+	getBoardSize(): number {
+		return this.numOfRowsAndCols;
+	}
+
+
+	markDiagonalLineLtr(queenPosition) {
+		const occupiedCells = []
+		// go from top left to bottom right -- starting from the point of click
+		for (let row = queenPosition.row, col = queenPosition.col + 1; col <= this.numOfRowsAndCols; col++) {
+			occupiedCells.push([++row, col])
+		}
+		return occupiedCells;
+	}
+
+
+	markDiagonalLineRtl(queenPosition) {
+		const occupiedCells = [];
+		// go from bottom right to top left -- 
 		if (queenPosition.col - 1 > 0 && queenPosition.row - 1 > 0) {
 			for (let row = queenPosition.row, col = queenPosition.col - 1; col > 0; col--) {
 				if (--row > 0 && col > 0) {
-					forbiddenCells.push([row, col,'diagonal line right to to left'])
+					occupiedCells.push([row, col])
 				}
 
 			}
 		}
+		return occupiedCells;
+	}
 
-		// go from left to right
-		for (let col = 1; col <= this.numOfRowsAndCols; col++) {
-			if (col !== queenPosition.col) {
-				forbiddenCells.push([queenPosition.row, col,'left to right'])
-			}
-		}
 
+	markTopToBottom(queenPosition) {
+		const occupiedCells = [];
 		// go from top to bottom
 		for (let row = 1; row <= this.numOfRowsAndCols; row++) {
 			if (row !== queenPosition.row) {
-				forbiddenCells.push([row, queenPosition.col,'top to bottom'])
+				occupiedCells.push([row, queenPosition.col])
 			}
 		}
-		console.log(forbiddenCells);
-
-		// and map the forbiddan places. 
-		// then match it with the global forbiddan places array with the map opreator.
-		// if there is no match, meaning there won't be a problem placing a queen there.
-
-
-		// pass the forbiddan array to the global one and push the queen.
-		// very important to also pass on the the global forbiddan the location of the newly 
-		// placed queen.
-
-		// update the view
-		// return false is queen is killed.
-
-		// console.log(forbiddenCells);
-
-		// TODO: 
-		// move logic to spearte function set and create simple if statement here.
-		return false;
-
+		return occupiedCells;
 	}
 
-setQueenPosition(queenPosition: Queen['position']): void {
-	this.queensPositions.push(queenPosition);
-	this.validateQueenPosition(queenPosition);
-}
 
-getGameStatus(): boolean {
-	return this.gameStatus;
-}
 
-setGameStatus(newGameStatus: boolean): boolean {
-	return this.gameStatus = newGameStatus;
-}
-
-setBoardSize(size: number = 8): void {
-	this.numOfRowsAndCols = size;
-}
-
-getBoardSize(): number {
-	return this.numOfRowsAndCols;
-}
+	markLeftToRight(queenPosition) {
+		const occupiedCells = [];
+		// go from left to right
+		for (let col = 1; col <= this.numOfRowsAndCols; col++) {
+			if (col !== queenPosition.col) {
+				occupiedCells.push([queenPosition.row, col])
+			}
+		}
+		return occupiedCells;
+	}
 }

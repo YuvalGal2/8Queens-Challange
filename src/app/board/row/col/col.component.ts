@@ -14,8 +14,7 @@ export class ColComponent implements OnInit {
     
   }
   onCellClicked():void {
-   
-    this.BoardService.setQueenPosition({row:this.colPos[0],col:this.colPos[1]})
+    this.BoardService.setQueenPosition([this.colPos[0],this.colPos[1]])
   }
 
 }
