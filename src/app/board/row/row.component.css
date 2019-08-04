@@ -7,6 +7,6 @@
 }
 @media(min-width:1500px) {
     .row-warpper { 
-        grid-template-columns: repeat(auto-fit, 6%);
+        grid-template-columns: repeat(auto-fit, 8%);
     }
 }

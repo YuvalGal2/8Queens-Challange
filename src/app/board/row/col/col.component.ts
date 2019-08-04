@@ -10,6 +10,7 @@ import { Component, OnInit, Input } from '@angular/core';
 export class ColComponent implements OnInit {
   @Input() colPos = [];
   cellStatus:any;
+  queenText:string = "Queen!";
   constructor(private BoardService: BoardService) { }
 
   ngOnInit() {
